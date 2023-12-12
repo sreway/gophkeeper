@@ -1,0 +1,108 @@
+syntax = "proto3";
+package gophkeeper;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "gophkeeper/v1";
+
+message user {
+  string id = 1;
+  string email = 2;
+  string hashPassword = 3;
+  google.protobuf.Timestamp created_at = 4;
+  google.protobuf.Timestamp updated_at = 5;
+}
+
+message seal {
+  string id = 1;
+  bytes encryptedShares = 2;
+  bytes recoveryShare = 3;
+  uint64 totalShares = 4;
+  uint64 requiredShares = 5;
+  string hashMasterPassword = 6;
+  string hashKey = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message secret {
+  string id = 1;
+  string owner = 2;
+  bytes encryptedValue = 3;
+  string hash = 4;
+  uint64 type = 5;
+  bool isDeleted = 6;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string token = 1;
+  user user = 2;
+  seal seal = 3;
+}
+
+message RegisterRequest {
+  string email = 1;
+  string password  = 2;
+  seal seal = 3;
+}
+
+message RegisterResponse {
+  user user = 1;
+}
+
+message HealthCheckRequest {}
+message HealthCheckResponse {
+  enum ServingStatus {
+    SERVING = 0;
+  }
+  ServingStatus status = 1;
+}
+
+message RecoveryKeyShareRequest {}
+
+message RecoveryKeyShareResponse {
+  bytes recoveryKeyShare = 1;
+}
+
+message UpdateSealRequest {
+  seal seal = 1;
+}
+
+message UpdateSealResponse {}
+
+message ListUpdatedSecretsResponse {
+  repeated secret secret = 1;
+}
+
+message ListUpdatedSecretsRequest {
+  google.protobuf.Timestamp updatedAfter = 1;
+}
+
+message BatchUpdateSecretsRequest {
+  repeated secret secret = 1;
+}
+
+message BatchUpdateSecretsResponse {}
+
+service AuthService{
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Login(LoginRequest) returns (LoginResponse);
+}
+
+service KeeperService{
+  rpc GetRecoveryKeyShare(RecoveryKeyShareRequest) returns (RecoveryKeyShareResponse);
+  rpc UpdateSeal(UpdateSealRequest) returns (UpdateSealResponse);
+  rpc ListUpdatedSecrets(ListUpdatedSecretsRequest) returns (ListUpdatedSecretsResponse);
+  rpc BatchUpdateSecrets(BatchUpdateSecretsRequest) returns (BatchUpdateSecretsResponse);
+}
+
+service HealthService{
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}

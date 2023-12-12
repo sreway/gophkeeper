@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS secrets(
+    id UUID NOT NULL UNIQUE,
+    owner UUID NOT NULL,
+    encrypted_value BYTEA NOT NULL,
+    hash VARCHAR(255) NOT NULL,
+    secret_type INTEGER NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (owner) REFERENCES users(id)
+);
